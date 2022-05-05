@@ -15,10 +15,10 @@ public class CAnthill {
         this.resources = new ArrayList<>();
 
         for(int nbCommanderAnt=0; nbCommanderAnt < 5; nbCommanderAnt++) {
-            this.commanders.add(new CCommanderAnt(this.color));
+            this.commanders.add(new CCommanderAnt(this.color, nbCommanderAnt));
         }
         for(int nbAnt=0; nbAnt < 50; nbAnt++) {
-            this.workers.add(new CWorkerAnt(this.color));
+            this.workers.add(new CWorkerAnt(this.color, nbAnt));
         }
     }
 

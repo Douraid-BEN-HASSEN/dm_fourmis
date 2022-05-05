@@ -1,14 +1,18 @@
+import com.sun.org.apache.bcel.internal.classfile.Constant;
+
 public class CMap {
+    private static CMap instance;
+
     private CTile tiles[][];
     private CAnthill anthills[];
     // private PheromoneManager;
 
     // constructor
-    public CMap(int pnbAnthill) {
+    private CMap(int pnbAnthill) {
         this.tiles = new CTile[CConstants.MAP_SIZE_X][CConstants.MAP_SIZE_Y];
         for (int i = 0; i < CConstants.MAP_SIZE_X; i++) {
             for (int j = 0; j < CConstants.MAP_SIZE_Y; j++) {
-                this.tiles[i][j] = new CTile();
+                this.tiles[i][j] = new CTile(i, j);
             }
         }
 
@@ -16,33 +20,62 @@ public class CMap {
 
         this.addRessources();
         this.addAnthills();
+
+
     }
 
     public CTile getTile(CAnt pAnt) {
+        for (int i = 0; i < CConstants.MAP_SIZE_X; i++) {
+            for (int j = 0; j < CConstants.MAP_SIZE_Y; j++) {
+                if(this.tiles[i][j].findAnt(pAnt)) {
+                    return this.tiles[i][j];
+                }
+            }
+        }
         return null;
     }
 
     public CTile getTile(CAnthill pAnthill) {
+        for (int i = 0; i < CConstants.MAP_SIZE_X; i++) {
+            for (int j = 0; j < CConstants.MAP_SIZE_Y; j++) {
+                if(this.tiles[i][j].findAnthill(pAnthill)) {
+                    return this.tiles[i][j];
+                }
+            }
+        }
         return null;
     }
 
     public void moveTo(CAnt pAnt, CTile pTile) {
-
+        this.getTile(pAnt).removeAnt(pAnt);
+        pTile.addAnt(pAnt);
     }
 
     public CTile getTopTile(CAnt pAnt) {
+        if(!(this.getTile(pAnt).getxPos() - 1 < 0)) {
+            return this.tiles[this.getTile(pAnt).getxPos() - 1][this.getTile(pAnt).getyPos()];
+        }
         return null;
     }
 
     public CTile getLeftTile(CAnt pAnt) {
+        if(!(this.getTile(pAnt).getyPos() - 1 < 0)) {
+            return this.tiles[this.getTile(pAnt).getxPos()][this.getTile(pAnt).getyPos() - 1];
+        }
         return null;
     }
 
     public CTile getRightTile(CAnt pAnt) {
+        if(!(this.getTile(pAnt).getyPos() + 1 >= CConstants.MAP_SIZE_Y)) {
+            return this.tiles[this.getTile(pAnt).getxPos()][this.getTile(pAnt).getyPos() + 1];
+        }
         return null;
     }
 
     public CTile getBottomTile(CAnt pAnt) {
+        if(!(this.getTile(pAnt).getxPos() + 1 >= CConstants.MAP_SIZE_X)) {
+            return this.tiles[this.getTile(pAnt).getxPos() + 1][this.getTile(pAnt).getyPos()];
+        }
         return null;
     }
 
@@ -53,6 +86,7 @@ public class CMap {
             }
             System.out.println("");
         }
+
     }
 
     // methode pour generer des ressources aleatoirement à la création de la map
@@ -122,4 +156,14 @@ public class CMap {
         }
 
     }
+
+    public static CMap shared() {
+        int nbAnthill = 3;
+        if(instance == null) {
+            instance = new CMap(nbAnthill);
+        }
+        return instance;
+    }
+
+
 }

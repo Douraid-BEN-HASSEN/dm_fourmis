@@ -9,13 +9,15 @@ public class CTile {
     private Map<EAnthillColor, Integer> pheromones = new HashMap<EAnthillColor, Integer>();
     private CAnthill anthill;
 
+    private int xPos;
+    private int yPos;
+
     // constructor
-    public CTile(CAnthill... pAnthill) {
-        if(pAnthill.length > 0) {
-            this.anthill = pAnthill[0];
-        } else {
-            this.anthill = null;
-        }
+    public CTile(int pxPos, int pyPos) {
+        this.xPos = pxPos;
+        this.yPos = pyPos;
+
+        this.anthill = null;
         this.resources = new ArrayList<CResource>();
         this.ants = new ArrayList<CAnt>();
     }
@@ -88,5 +90,21 @@ public class CTile {
         if(!(this.ants.size() > 0 || this.resources.size() > 0 || this.anthill != null)) {
             System.out.print("-");
         }
+    }
+
+    public boolean findAnt(CAnt pAnt) {
+        return this.ants.contains(pAnt);
+    }
+
+    public boolean findAnthill(CAnthill pAnthill) {
+        return this.anthill.equals(pAnthill);
+    }
+
+    public int getxPos() {
+        return this.xPos;
+    }
+
+    public int getyPos() {
+        return this.yPos;
     }
 }
