@@ -71,10 +71,10 @@ public class CAnthill extends Thread implements Flow.Subscriber<CMessage> {
             // ALORS:   => donner ordre EQueenOrder.GO_ANTHILL aux commandants dans un rayon de 100
             // FIN SI
             if(map.getTempsRestant() > 60) {
-                CMessage message = new CMessage(EQueenOrder.GO_FIND_RESOURCE);
+                CMessage message = new CMessage(EQueenOrder.GO_FIND_RESOURCE, this);
                 this.publisher.submit(message);
             } else {
-                CMessage message = new CMessage(EQueenOrder.GO_ANTHILL);
+                CMessage message = new CMessage(EQueenOrder.GO_ANTHILL, this);
                 this.publisher.submit(message);
             }
 

@@ -36,7 +36,7 @@ public class CWorkerAnt extends CAnt implements Flow.Subscriber<CMessage> {
             if(this.order == EQueenOrder.GO_ANTHILL) { // || this.resources.size() == CConstants.MAX_RESSOURCES
                 this.depilerDeplacement();
             } else if((this.order == EQueenOrder.FOCUS_FOOD || this.order == EQueenOrder.FOCUS_POINT || this.order == EQueenOrder.FOCUS_ALL)
-                        && this.resources.size() < CConstants.MAX_RESSOURCES) {
+                    && this.resources.size() < CConstants.MAX_RESSOURCES) {
                 this.deplacementAleatoire();
             }
             CUtils.wait(50);
@@ -57,7 +57,12 @@ public class CWorkerAnt extends CAnt implements Flow.Subscriber<CMessage> {
     @Override
     public void onNext(CMessage pMessage) {
         // distance < 100
-        this.order = pMessage.getOrder();
+        int distanceX = this.getxPos() - pMessage.getCommander().getxPos() >= 0 ? this.getxPos() - pMessage.getCommander().getxPos() : (this.getxPos() - pMessage.getCommander().getxPos())*-1;
+        int distanceY = this.getyPos() - pMessage.getCommander().getyPos() >= 0 ? this.getyPos() - pMessage.getCommander().getyPos() : (this.getyPos() - pMessage.getCommander().getyPos())*-1;
+
+        if(distanceX <= 100 && distanceY <= 100) {
+            this.order = pMessage.getOrder();
+        }
         subscription.request(2);
     }
 

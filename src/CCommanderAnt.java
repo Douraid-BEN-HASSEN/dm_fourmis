@@ -27,15 +27,15 @@ public class CCommanderAnt extends CAnt implements Flow.Subscriber<CMessage> {
                 int randResourceType = CUtils.getRandom(0, 2);
                 CMessage message;
 
-                if(randResourceType == 0) message = new CMessage(EQueenOrder.FOCUS_FOOD);
-                else if(randResourceType == 1) message = new CMessage(EQueenOrder.FOCUS_POINT);
-                else message = new CMessage(EQueenOrder.FOCUS_ALL);
+                if(randResourceType == 0) message = new CMessage(EQueenOrder.FOCUS_FOOD, this);
+                else if(randResourceType == 1) message = new CMessage(EQueenOrder.FOCUS_POINT, this);
+                else message = new CMessage(EQueenOrder.FOCUS_ALL, this);
 
                 this.publisher.submit(message);
                 this.deplacementAleatoire();
 
             } else if(this.order == EQueenOrder.GO_ANTHILL) {
-                CMessage message = new CMessage(EQueenOrder.GO_ANTHILL);
+                CMessage message = new CMessage(EQueenOrder.GO_ANTHILL, this);
                 this.publisher.submit(message);
                 // => se deplacer jusqu'à la anthill
                 this.depilerDeplacement();
@@ -64,7 +64,12 @@ public class CCommanderAnt extends CAnt implements Flow.Subscriber<CMessage> {
     @Override
     public void onNext(CMessage pMessage) {
         // distance < 50
-        this.order = pMessage.getOrder();
+        int distanceX = this.getxPos() - pMessage.getAnthill().getPosition().x >= 0 ? this.getxPos() - pMessage.getAnthill().getPosition().x : (this.getxPos() - pMessage.getAnthill().getPosition().x)*-1;
+        int distanceY = this.getyPos() - pMessage.getAnthill().getPosition().y >= 0 ? this.getyPos() - pMessage.getAnthill().getPosition().y : (this.getyPos() - pMessage.getAnthill().getPosition().y)*-1;
+
+        if(distanceX <= 50 && distanceY <= 50) {
+            this.order = pMessage.getOrder();
+        }
         subscription.request(2);
     }
 
