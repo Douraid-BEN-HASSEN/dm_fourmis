@@ -191,8 +191,8 @@ public class CMap {
         int positions[][] = new int[this.anthills.length][2];
         int index = 0;
         while(index < this.anthills.length) {
-            int x = 0 + (int)(Math.random() * ((CConstants.MAP_SIZE_X-1 - 0) + 1));
-            int y = 0 + (int)(Math.random() * ((CConstants.MAP_SIZE_Y-1 - 0) + 1));
+            int x = CUtils.getRandom(0, CConstants.MAP_SIZE_X-1);
+            int y = CUtils.getRandom(0, CConstants.MAP_SIZE_Y-1);
 
             // check pos si pas deja prise
             boolean pasPrise = false;
@@ -204,8 +204,8 @@ public class CMap {
                     }
                 }
                 if(!pasPrise) {
-                    x = 0 + (int)(Math.random() * ((CConstants.MAP_SIZE_X-1 - 0) + 1));
-                    y = 0 + (int)(Math.random() * ((CConstants.MAP_SIZE_Y-1 - 0) + 1));
+                    x = CUtils.getRandom(0, CConstants.MAP_SIZE_X-1);
+                    y = CUtils.getRandom(0, CConstants.MAP_SIZE_Y-1);
                 }
             }
 
