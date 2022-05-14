@@ -3,5 +3,6 @@ public enum EQueenOrder {
     GO_ANTHILL,
     FOCUS_FOOD,
     FOCUS_POINT,
-    FOCUS_ALL
+    FOCUS_ALL,
+    NO_ORDER
 }

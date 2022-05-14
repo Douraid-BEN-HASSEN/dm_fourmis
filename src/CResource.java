@@ -1,4 +1,10 @@
 public class CResource {
-    public CResource() {
+    private EResourceType type;
+    public CResource(EResourceType pType) {
+        this.type = pType;
+    }
+
+    public EResourceType getType() {
+        return this.type;
     }
 }

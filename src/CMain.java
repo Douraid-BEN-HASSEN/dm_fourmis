@@ -1,10 +1,13 @@
-import javafx.application.Application;
-
 public class CMain  {
     public static void main(String[] args) {
+        CMap map = CMap.shared();
 
-        CMap.shared();
-        CMap.shared().displayMap();
+        while (map.getTempsRestant() > 0) {
+            map.displayMap();
+            CUtils.wait(1000);
+        }
+
+        map.displayMap();
 
     }
 }

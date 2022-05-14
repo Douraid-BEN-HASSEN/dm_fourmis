@@ -1,12 +1,16 @@
+import java.awt.*;
 import java.util.ArrayList;
-import java.util.Observable;
+import java.util.LinkedList;
+import java.util.concurrent.Flow;
 
-public class CWorkerAnt extends CAnt {
+public class CWorkerAnt extends CAnt implements Flow.Subscriber<CMessage> {
 
-    private ArrayList<CResource> resources;
 
-    public CWorkerAnt(EAnthillColor pAnthillColor, int pId) {
-        super(pAnthillColor, pId);
+    private Flow.Subscription subscription;
+
+    public CWorkerAnt(CAnthill pAnthill, int pId) {
+        super(pAnthill, pId);
+        this.pileDeplacement.add(new Point(this.getxPos(),this.getyPos()));
     }
 
     public void update() {
@@ -14,54 +18,132 @@ public class CWorkerAnt extends CAnt {
     }
 
     public void run() {
+        // recevoir ordre d'un comandant
+        // executer les ordres
+        // si fourmis sur la même case, alors combat
+
+        // SI fourmis sur la même case
+        // ALORS:   => combatre
+        // SINON SI ordre = FOCUS_FOOD
+        // ALORS:   => se deplacer pour trouver des ressources
+        // SINON SI order = FOCUS_POINT
+        // ALORS:   => se deplacer au point indiqué
+        // FIN SI
+
+        CMap map = CMap.shared();
+
+        while (this.isAlive && !map.getPartieFinie()) {
+            if(this.order == EQueenOrder.GO_ANTHILL) { // || this.resources.size() == CConstants.MAX_RESSOURCES
+                this.depilerDeplacement();
+            } else if((this.order == EQueenOrder.FOCUS_FOOD || this.order == EQueenOrder.FOCUS_POINT || this.order == EQueenOrder.FOCUS_ALL)
+                        && this.resources.size() < CConstants.MAX_RESSOURCES) {
+                this.deplacementAleatoire();
+            }
+            CUtils.wait(50);
+        }
+
+        while (this.pileDeplacement.size() > 0) {
+            this.depilerDeplacement();
+            CUtils.wait(50);
+        }
+    }
+
+    @Override
+    public void onSubscribe(Flow.Subscription subscription) {
+        this.subscription = subscription;
+        subscription.request(2);
+    }
+
+    @Override
+    public void onNext(CMessage pMessage) {
+        // distance < 100
+        this.order = pMessage.getOrder();
+        subscription.request(2);
+    }
+
+    @Override
+    public void onError(Throwable throwable) {
+
+    }
+
+    @Override
+    public void onComplete() {
+
+    }
+
+    private void deplacementAleatoire() {
+        CMap map = CMap.shared();
+
         int direction;
         boolean deplacement = true;
 
-        while (true){
-            if(deplacement) {
-                CTile tile = new CTile(0,0);
-                deplacement = false;
-                direction = (int) (Math.random() * 4);
+        if(deplacement) {
+            CTile tile = new CTile(0,0);
+            deplacement = false;
+            direction = (int) (Math.random() * 4);
 
-                switch(direction)
-                {
-                    case 0:
-                        // RIGHT
-                        tile = CMap.shared().getRightTile(this);
-                        if(tile == null) deplacement = true;
-                        break;
-                    case 1:
-                        // LEFT
-                        tile = CMap.shared().getLeftTile(this);
-                        if(tile == null) deplacement = true;
-                        break;
-                    case 2:
-                        // BOTTOM
-                        tile = CMap.shared().getBottomTile(this);
-                        if(tile == null) deplacement = true;
-                        break;
-                    case 3:
-                        // TOP
-                        tile = CMap.shared().getTopTile(this);
-                        if(tile == null) deplacement = true;
-                        break;
-                }
-
-                if(!deplacement) {
-                    CMap.shared().moveTo(this, tile);
-                }
+            switch(direction)
+            {
+                case 0:
+                    // RIGHT
+                    tile = map.getRightTile(this);
+                    if(tile == null) deplacement = true;
+                    break;
+                case 1:
+                    // LEFT
+                    tile = map.getLeftTile(this);
+                    if(tile == null) deplacement = true;
+                    break;
+                case 2:
+                    // BOTTOM
+                    tile = map.getBottomTile(this);
+                    if(tile == null) deplacement = true;
+                    break;
+                case 3:
+                    // TOP
+                    tile = map.getTopTile(this);
+                    if(tile == null) deplacement = true;
+                    break;
             }
 
+            if(!deplacement) {
+                map.moveTo(this, tile.getxPos(), tile.getyPos());
+                this.pileDeplacement.add(new Point(this.getxPos(),this.getyPos()));
 
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                // prendre la ressource uniquement si on est pas dans la anthill
+                if(tile.getxPos() != this.anthill.getPosition().x && this.getyPos() != this.anthill.getPosition().y) {
+                    if(this.order == EQueenOrder.FOCUS_FOOD && tile.getResourceType() == EResourceType.FOOD && tile.getTileResource() > 0) {
+                        CResource ressource = tile.takeResource();
+                        if(ressource != null) this.takeRessource(ressource);
+                    } else if(this.order == EQueenOrder.FOCUS_POINT && tile.getResourceType() == EResourceType.POINT && tile.getTileResource() > 0) {
+                        CResource ressource = tile.takeResource();
+                        if(ressource != null) this.takeRessource(ressource);
+                    }
+                }
+
             }
         }
     }
 
-    public void addObserver(Observable pObservalbe) {
+    private void depilerDeplacement() {
+        if(this.pileDeplacement.size() > 0) {
+            CMap map = CMap.shared();
+            Point point = this.pileDeplacement.pollLast();
+            map.moveTo(this, point.x, point.y);
 
+            // SI fourmis sur dans la fourmilière (pile finie)
+            // ALORS:   => drop/ajoute chaque ressource 1 par 1
+            // FIN SI
+            if(this.pileDeplacement.size() == 0) {
+                if(this.resources.size() > 0) this.anthill.addResource(this.resources);
+
+                CTile tile = map.getTile(this.getxPos(), this.getyPos());
+                int nResource = this.resources.size();
+                for(int nbRessources=0; nbRessources < nResource; nbRessources++) {
+                    tile.dropResource(this.resources.pollLast(), this);
+                }
+            }
+        }
     }
+
 }
