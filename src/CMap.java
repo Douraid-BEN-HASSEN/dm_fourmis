@@ -1,19 +1,18 @@
 import java.awt.*;
-import java.util.Timer;
-import java.util.TimerTask;
 
+// classe qui gère la map
 public class CMap {
     private static volatile CMap instance;
-
     private CTile tiles[][];
     private CAnthill anthills[];
     // private PheromoneManager;
-
     private int tempsRestant;
-
+    private boolean partieFinie;
     private Thread timer_th;
 
-    private boolean partieFinie;
+    // +-----------+
+    // | CLASS FCT |
+    // +-----------+
 
     // constructor
     private CMap(int pnbAnthill) {
@@ -42,73 +41,7 @@ public class CMap {
 
     }
 
-    public CTile getTile(CAnt pAnt) {
-        for (int i = 0; i < CConstants.MAP_SIZE_X; i++) {
-            for (int j = 0; j < CConstants.MAP_SIZE_Y; j++) {
-                if(this.tiles[i][j].findAnt(pAnt)) {
-                    return this.tiles[i][j];
-                }
-            }
-        }
-        return null;
-    }
-
-    public CTile getTile(CAnthill pAnthill) {
-        for (int i = 0; i < CConstants.MAP_SIZE_X; i++) {
-            for (int j = 0; j < CConstants.MAP_SIZE_Y; j++) {
-                if(this.tiles[i][j].findAnthill(pAnthill)) {
-                    return this.tiles[i][j];
-                }
-            }
-        }
-        return null;
-    }
-
-    public CTile getTile(int pX, int pY) {
-        try{
-            if(pX < 0 || pY < 0) return null;
-            if(pX >= this.tiles.length || pY >= this.tiles[0].length) return null;
-            return this.tiles[pX][pY];
-        }catch (Exception e){
-            return null;
-        }
-    }
-
-    public void moveTo(CAnt pAnt, int pXTo, int pYTo) {
-        this.tiles[pAnt.getxPos()][pAnt.getyPos()].removeAnt(pAnt);
-        pAnt.setxPos(pXTo);
-        pAnt.setyPos(pYTo);
-        this.tiles[pXTo][pYTo].addAnt(pAnt);
-    }
-
-    public CTile getTopTile(CAnt pAnt) {
-        if(!(pAnt.getxPos() - 1 < 0)) {
-            return this.tiles[pAnt.getxPos() - 1][pAnt.getyPos()];
-        }
-        return null;
-    }
-
-    public CTile getLeftTile(CAnt pAnt) {
-        if(!(pAnt.getyPos() - 1 < 0)) {
-            return this.tiles[pAnt.getxPos()][pAnt.getyPos() - 1];
-        }
-        return null;
-    }
-
-    public CTile getRightTile(CAnt pAnt) {
-        if(!(pAnt.getyPos() + 1 >= CConstants.MAP_SIZE_Y)) {
-            return this.tiles[pAnt.getxPos()][pAnt.getyPos() + 1];
-        }
-        return null;
-    }
-
-    public CTile getBottomTile(CAnt pAnt) {
-        if(!(pAnt.getxPos() + 1 >= CConstants.MAP_SIZE_X)) {
-            return this.tiles[pAnt.getxPos() + 1][pAnt.getyPos()];
-        }
-        return null;
-    }
-
+    // methode pour afficher toutes les tiles
     public void displayMap() {
         for (int i = 0; i < CConstants.MAP_SIZE_X; i++) {
             for (int j = 0; j < CConstants.MAP_SIZE_Y; j++) {
@@ -235,6 +168,15 @@ public class CMap {
         }
     }
 
+    // methode pour deplacer une fourmis dans une case specifique
+    public void moveTo(CAnt pAnt, int pXTo, int pYTo) {
+        this.tiles[pAnt.getxPos()][pAnt.getyPos()].removeAnt(pAnt);
+        pAnt.setxPos(pXTo);
+        pAnt.setyPos(pYTo);
+        this.tiles[pXTo][pYTo].addAnt(pAnt);
+    }
+
+    // methode qui gère le temps
     private void timerTH() {
         while (this.tempsRestant > 0) {
             this.tempsRestant--;
@@ -243,14 +185,64 @@ public class CMap {
         this.partieFinie = true;
     }
 
+    // +--------+
+    // | GETTER |
+    // +--------+
+
+    // methode qui retourne une tile specifique
+    public CTile getTile(int pX, int pY) {
+        try{
+            if(pX < 0 || pY < 0) return null;
+            if(pX >= this.tiles.length || pY >= this.tiles[0].length) return null;
+            return this.tiles[pX][pY];
+        }catch (Exception e){
+            return null;
+        }
+    }
+
+    // methode qui retourne la case au dessus de la fourmis
+    public CTile getTopTile(CAnt pAnt) {
+        if(!(pAnt.getxPos() - 1 < 0)) {
+            return this.tiles[pAnt.getxPos() - 1][pAnt.getyPos()];
+        }
+        return null;
+    }
+
+    // methode qui retourne la case à gauche de la fourmis
+    public CTile getLeftTile(CAnt pAnt) {
+        if(!(pAnt.getyPos() - 1 < 0)) {
+            return this.tiles[pAnt.getxPos()][pAnt.getyPos() - 1];
+        }
+        return null;
+    }
+
+    // methode qui retourne la case à droite de la fourmis
+    public CTile getRightTile(CAnt pAnt) {
+        if(!(pAnt.getyPos() + 1 >= CConstants.MAP_SIZE_Y)) {
+            return this.tiles[pAnt.getxPos()][pAnt.getyPos() + 1];
+        }
+        return null;
+    }
+
+    // methode qui retourne la case au dessous de la fourmis
+    public CTile getBottomTile(CAnt pAnt) {
+        if(!(pAnt.getxPos() + 1 >= CConstants.MAP_SIZE_X)) {
+            return this.tiles[pAnt.getxPos() + 1][pAnt.getyPos()];
+        }
+        return null;
+    }
+
+    // methode qui retourne le temps restant
     public int getTempsRestant() {
         return this.tempsRestant;
     }
 
+    // methode qui retourne partieFinie
     public boolean getPartieFinie() {
         return this.partieFinie;
     }
 
+    // methode qui retourne le singleton
     public static CMap shared() {
         int nbAnthill = 4;
         CMap result = instance;
@@ -264,6 +256,5 @@ public class CMap {
             return instance;
         }
     }
-
 
 }

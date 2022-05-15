@@ -1,22 +1,19 @@
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.concurrent.Flow;
-
 public class CWorkerAnt extends CAnt implements Flow.Subscriber<CMessage> {
-
-
     private Flow.Subscription subscription;
 
+    // +-----------+
+    // | CLASS FCT |
+    // +-----------+
+
+    // constructor
     public CWorkerAnt(CAnthill pAnthill, int pId) {
         super(pAnthill, pId);
         this.pileDeplacement.add(new Point(this.getxPos(),this.getyPos()));
     }
 
-    public void update() {
-
-    }
-
+    // methode run
     public void run() {
         // recevoir ordre d'un comandant
         // executer les ordres
@@ -48,34 +45,7 @@ public class CWorkerAnt extends CAnt implements Flow.Subscriber<CMessage> {
         }
     }
 
-    @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        this.subscription = subscription;
-        subscription.request(2);
-    }
-
-    @Override
-    public void onNext(CMessage pMessage) {
-        // distance < 100
-        int distanceX = this.getxPos() - pMessage.getCommander().getxPos() >= 0 ? this.getxPos() - pMessage.getCommander().getxPos() : (this.getxPos() - pMessage.getCommander().getxPos())*-1;
-        int distanceY = this.getyPos() - pMessage.getCommander().getyPos() >= 0 ? this.getyPos() - pMessage.getCommander().getyPos() : (this.getyPos() - pMessage.getCommander().getyPos())*-1;
-
-        if(distanceX <= 100 && distanceY <= 100) {
-            this.order = pMessage.getOrder();
-        }
-        subscription.request(2);
-    }
-
-    @Override
-    public void onError(Throwable throwable) {
-
-    }
-
-    @Override
-    public void onComplete() {
-
-    }
-
+    // methode pour se deplacer aleatoirement
     private void deplacementAleatoire() {
         CMap map = CMap.shared();
 
@@ -130,6 +100,7 @@ public class CWorkerAnt extends CAnt implements Flow.Subscriber<CMessage> {
         }
     }
 
+    // methode pour revenir sur ses deplacements
     private void depilerDeplacement() {
         if(this.pileDeplacement.size() > 0) {
             CMap map = CMap.shared();
@@ -149,6 +120,53 @@ public class CWorkerAnt extends CAnt implements Flow.Subscriber<CMessage> {
                 }
             }
         }
+    }
+
+    // methode de gestion des combats
+    private void gestionCombat() {
+        // SI fourmis autre couleur
+        // ALORS:   SI fourmisAdverse = commandant
+        //          ALORS:  ALORS:  => isAlive = false (on se fait tuer)
+        //                  FIN SI
+        //          SINON
+        //          ALORS:  SI isInjured = false ET fourmisAdverse.isInjured = true
+        //                  ALORS:  => foursAdverse.isAlive = false (on tue la fourmis)
+        //                  SINON SI isInjured = true ET fourmisAdverse.isInjured = false
+        //                  ALORS:  => isAlive = false (on se fait tuer)
+        //                          => foursAdverse.isInjured = true
+        //                  SINON:
+        //                  ALORS: => combat au hasard
+        //                  FIN SI
+        //          FIN SI
+        // FIN SI
+    }
+
+    // +------+
+    // | FLOW |
+    // +------+
+    @Override
+    public void onSubscribe(Flow.Subscription subscription) {
+        this.subscription = subscription;
+        subscription.request(2);
+    }
+    @Override
+    public void onNext(CMessage pMessage) {
+        // distance < 100
+        int distanceX = this.getxPos() - pMessage.getCommander().getxPos() >= 0 ? this.getxPos() - pMessage.getCommander().getxPos() : (this.getxPos() - pMessage.getCommander().getxPos())*-1;
+        int distanceY = this.getyPos() - pMessage.getCommander().getyPos() >= 0 ? this.getyPos() - pMessage.getCommander().getyPos() : (this.getyPos() - pMessage.getCommander().getyPos())*-1;
+
+        if(distanceX <= 100 && distanceY <= 100) {
+            this.order = pMessage.getOrder();
+        }
+        subscription.request(2);
+    }
+    @Override
+    public void onError(Throwable throwable) {
+
+    }
+    @Override
+    public void onComplete() {
+
     }
 
 }

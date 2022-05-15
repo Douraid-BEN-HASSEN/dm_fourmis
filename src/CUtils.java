@@ -1,6 +1,8 @@
+// classe utilitaire
 public class CUtils {
-    public static void wait(int ms)
-    {
+
+    // methode pour "sleep"
+    public static void wait(int ms) {
         try
         {
             Thread.sleep(ms);
@@ -11,7 +13,9 @@ public class CUtils {
         }
     }
 
+    // methode qui retourne un nombre aleatoire
     public static int getRandom(int pMin, int pMax) {
         return pMin + (int)(Math.random() * ((pMax) + 1));
     }
+
 }

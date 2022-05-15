@@ -3,15 +3,18 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+// classe qui represente les tiles
 public class CTile {
-
     private LinkedList<CResource> resources;
     private ArrayList<CAnt> ants;
     private Map<EAnthillColor, Integer> pheromones = new HashMap<EAnthillColor, Integer>();
     private CAnthill anthill;
-
     private int xPos;
     private int yPos;
+
+    // +-----------+
+    // | CLASS FCT |
+    // +-----------+
 
     // constructor
     public CTile(int pxPos, int pyPos) {
@@ -23,18 +26,21 @@ public class CTile {
         this.ants = new ArrayList<CAnt>();
     }
 
+    // methode pour ajouter une fourmis sur la tile
     public void addAnt(CAnt pAnt) {
         synchronized (this.ants) {
             this.ants.add(pAnt);
         }
     }
 
+    // methode pour retirer une fourmis
     public void removeAnt(CAnt pAnt) {
         synchronized(this.ants) {
             this.ants.remove(pAnt);
         }
     }
 
+    // methode pour retirer une ressource
     public void dropResource(CResource pResource, CAnt pAnt) {
         synchronized (this.resources) {
             if(pAnt != null) {
@@ -46,6 +52,7 @@ public class CTile {
         }
     }
 
+    // methode pour prendre une ressource
     public CResource takeResource() {
         synchronized (this.resources) {
             if(this.resources.size() > 0) {
@@ -56,50 +63,17 @@ public class CTile {
         }
     }
 
-    public int getTileResource() {
-        return this.resources.size();
-    }
-
-    public EResourceType getResourceType() {
-        synchronized (this.resources) {
-            if(this.getTileResource() > 0) {
-                return this.resources.getLast().getType();
-            }
-            return  null;
-        }
-    }
-
-    public ArrayList<CAnt> getAnts() {
-        return this.ants;
-    }
-
-    public int getPheromoneQuantity(EAnthillColor pAnthillColor) {
-        return 0;
-    }
-
+    // methode pour ajouter une pheromone
     public void addPheromone(EAnthillColor pAnthillColor) {
 
     }
 
+    // methode pour enlever une pheromone
     public void removePheromone(EAnthillColor pAnthillColor) {
 
     }
 
-    public void setAnthill(CAnthill pAnthill) {
-        this.anthill = pAnthill;
-        // get worker ant
-        for(int nbWorkerAnt=0; nbWorkerAnt < this.anthill.getWorkers().size(); nbWorkerAnt++) {
-            this.addAnt(this.anthill.getWorkers().get(nbWorkerAnt));
-        }
-        // get commander ant
-        for(int nbCommanderAnt=0; nbCommanderAnt < this.anthill.getCommander().size(); nbCommanderAnt++) {
-            this.addAnt(this.anthill.getCommander().get(nbCommanderAnt));
-        }
-
-        int a = 0;
-
-    }
-
+    // methode pour afficher la tile
     public void afficherTile() {
         synchronized (this.ants) {
             if(this.ants.size() > 0) {
@@ -129,25 +103,64 @@ public class CTile {
         }
     }
 
-    public boolean findAnt(CAnt pAnt) {
-        for(int it=0; it < this.ants.size(); it++) {
-            if(this.ants.get(it).getId() == pAnt.getAntId()) return true;
-        }
-        return false;
-        //this.ants.contains(pAnt)
-    }
+    // +--------+
+    // | GETTER |
+    // +--------+
 
-    public boolean findAnthill(CAnthill pAnthill) {
-        if(this.anthill != null) return this.anthill.getColor() == pAnthill.getColor();
-        else return false;
-    }
-
+    // methode qui retourne la position x de la tile
     public int getxPos() {
         return this.xPos;
     }
 
+    // methode qui retourne la position y de la tile
     public int getyPos() {
         return this.yPos;
     }
+
+    // methode qui retourne le nombre de ressource sur la tile
+    public int getTileResource() {
+        return this.resources.size();
+    }
+
+    // methode qui retourne le type de ressource de la tile
+    public EResourceType getResourceType() {
+        synchronized (this.resources) {
+            if(this.getTileResource() > 0) {
+                return this.resources.getLast().getType();
+            }
+            return  null;
+        }
+    }
+
+    // methode qui retourne les fourmis de la case
+    public ArrayList<CAnt> getAnts() {
+        return this.ants;
+    }
+
+    // methode qui retourne le nombre de pheromone sur la tile
+    public int getPheromoneQuantity(EAnthillColor pAnthillColor) {
+        return 0;
+    }
+
+    // +--------+
+    // | SETTER |
+    // +--------+
+
+    // methode qui enregistre une anthill
+    public void setAnthill(CAnthill pAnthill) {
+        this.anthill = pAnthill;
+        // get worker ant
+        for(int nbWorkerAnt=0; nbWorkerAnt < this.anthill.getWorkers().size(); nbWorkerAnt++) {
+            this.addAnt(this.anthill.getWorkers().get(nbWorkerAnt));
+        }
+        // get commander ant
+        for(int nbCommanderAnt=0; nbCommanderAnt < this.anthill.getCommander().size(); nbCommanderAnt++) {
+            this.addAnt(this.anthill.getCommander().get(nbCommanderAnt));
+        }
+
+        int a = 0;
+
+    }
+
 
 }

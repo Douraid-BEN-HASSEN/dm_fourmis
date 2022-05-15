@@ -4,19 +4,22 @@ import java.util.LinkedList;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
+// classe fourmilière
 public class CAnthill extends Thread implements Flow.Subscriber<CMessage> {
+    private int nResource;
+    private int nPoint;
+    private Point position;
     private ArrayList<CWorkerAnt> workers;
     private ArrayList<CCommanderAnt> commanders;
     private ArrayList<CResource> resources;
     private EAnthillColor color;
 
-    private int nResource;
-    private int nPoint;
-
     private Flow.Subscription subscription;
     private SubmissionPublisher<CMessage> publisher;
 
-    private Point position;
+    // +-----------+
+    // | CLASS FCT |
+    // +-----------+
 
     // constructor
     public CAnthill(EAnthillColor pAnthillColor, Point pPosition) {
@@ -32,7 +35,8 @@ public class CAnthill extends Thread implements Flow.Subscriber<CMessage> {
         this.publisher = new CPublisher();
 
         // TODO: RENDRE MODULAIRE (SCALE+++)
-        for(int nbCommanderAnt=0; nbCommanderAnt < 5; nbCommanderAnt++) {
+        // ajout des fourmis
+        for(int nbCommanderAnt=0; nbCommanderAnt < CConstants.N_COMMANDER; nbCommanderAnt++) {
             CCommanderAnt ant = new CCommanderAnt(this, nbCommanderAnt);
             ant.setxPos(this.position.x);
             ant.setyPos(this.position.y);
@@ -40,7 +44,7 @@ public class CAnthill extends Thread implements Flow.Subscriber<CMessage> {
             this.publisher.subscribe(ant);
             ant.start();
         }
-        for(int nbWorkerAnt=0; nbWorkerAnt < 50; nbWorkerAnt++) {
+        for(int nbWorkerAnt=0; nbWorkerAnt < CConstants.N_WORKER; nbWorkerAnt++) {
             CWorkerAnt ant = new CWorkerAnt(this, nbWorkerAnt);
             ant.setxPos(this.position.x);
             ant.setyPos(this.position.y);
@@ -61,6 +65,7 @@ public class CAnthill extends Thread implements Flow.Subscriber<CMessage> {
         }
     }
 
+    // methode thread
     public void run() {
         CMap map = CMap.shared();
 
@@ -83,6 +88,7 @@ public class CAnthill extends Thread implements Flow.Subscriber<CMessage> {
 
     }
 
+    // methode pour ajouter une ressource
     public void addResource(LinkedList<CResource> pResource) {
         synchronized (this.resources) {
             this.resources.addAll(pResource);
@@ -97,54 +103,68 @@ public class CAnthill extends Thread implements Flow.Subscriber<CMessage> {
         }
     }
 
-    public CAnt killAnt(CAnt pAnt) {
-        int index = this.commanders.indexOf(pAnt);
-        if(index > -1) {
-            return this.commanders.remove(index);
+    // methode pour tuer (supprimer) une fourmis
+    public boolean killAnt(CAnt pAnt) {
+        if(pAnt instanceof CCommanderAnt) {
+            synchronized (this.commanders) {
+                return this.commanders.remove(pAnt);
+            }
         } else {
-            index = this.workers.indexOf(pAnt);
-            return this.workers.remove(index);
+            synchronized (this.workers) {
+                return this.workers.remove(pAnt);
+            }
         }
     }
 
+    // +--------+
+    // | GETTER |
+    // +--------+
+
+    // methode qui retourne les workers
     public ArrayList<CWorkerAnt> getWorkers() {
         return this.workers;
     }
 
+    // methode qui retourne les commanders
     public ArrayList<CCommanderAnt> getCommander() {
         return this.commanders;
     }
 
+    // methode qui retourne les ressources
     public int getnResource() {
         return this.nResource;
     }
 
+    // methode qui retourne le nombre de point
     public int getnPoint() {
         return this.nPoint;
     }
 
+    // mehtode qui retourne la couleur de la anthill
     public EAnthillColor getColor() {
         return this.color;
     }
 
+    // methode qui retourne la position
     public Point getPosition() {
         return this.position;
     }
+
+    // +------+
+    // | FLOW |
+    // +------+
     @Override
     public void onSubscribe(Flow.Subscription subscription) {
 
     }
-
     @Override
     public void onNext(CMessage item) {
 
     }
-
     @Override
     public void onError(Throwable throwable) {
 
     }
-
     @Override
     public void onComplete() {
 

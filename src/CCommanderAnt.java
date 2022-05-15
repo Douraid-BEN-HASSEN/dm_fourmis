@@ -2,21 +2,23 @@ import java.awt.*;
 import java.util.concurrent.Flow;
 import java.util.concurrent.SubmissionPublisher;
 
+// classe commander
 public class CCommanderAnt extends CAnt implements Flow.Subscriber<CMessage> {
-
     private Flow.Subscription subscription;
     private SubmissionPublisher<CMessage> publisher;
 
+    // +-----------+
+    // | CLASS FCT |
+    // +-----------+
+
+    // constructor
     public CCommanderAnt(CAnthill pAnthill, int pId) {
         super(pAnthill, pId);
         this.publisher = new CPublisher();
         this.pileDeplacement.add(new Point(this.getxPos(),this.getyPos()));
     }
 
-    public void update() {
-
-    }
-
+    // methode thread
     public void run() {
         CMap map = CMap.shared();
 
@@ -40,10 +42,6 @@ public class CCommanderAnt extends CAnt implements Flow.Subscriber<CMessage> {
                 // => se deplacer jusqu'à la anthill
                 this.depilerDeplacement();
             }
-            // SI fourmis autre couleur sur la même case
-            // ALORS:   => combat
-            // FIN SI
-            //...
 
             CUtils.wait(50);
         }
@@ -52,39 +50,14 @@ public class CCommanderAnt extends CAnt implements Flow.Subscriber<CMessage> {
             this.depilerDeplacement();
             CUtils.wait(50);
         }
-
     }
 
-    @Override
-    public void onSubscribe(Flow.Subscription subscription) {
-        this.subscription = subscription;
-        subscription.request(2);
-    }
-
-    @Override
-    public void onNext(CMessage pMessage) {
-        // distance < 50
-        int distanceX = this.getxPos() - pMessage.getAnthill().getPosition().x >= 0 ? this.getxPos() - pMessage.getAnthill().getPosition().x : (this.getxPos() - pMessage.getAnthill().getPosition().x)*-1;
-        int distanceY = this.getyPos() - pMessage.getAnthill().getPosition().y >= 0 ? this.getyPos() - pMessage.getAnthill().getPosition().y : (this.getyPos() - pMessage.getAnthill().getPosition().y)*-1;
-
-        if(distanceX <= 50 && distanceY <= 50) {
-            this.order = pMessage.getOrder();
-        }
-        subscription.request(2);
-    }
-
-    @Override
-    public void onError(Throwable throwable) {
-    }
-
-    @Override
-    public void onComplete() {
-    }
-
+    // methode pour relier un subscriber et un publisher
     public void linkWorker(CWorkerAnt pAnt) {
         this.publisher.subscribe(pAnt);
     }
 
+    // methode pour se deplacer aleatoirement
     private void deplacementAleatoire() {
         int direction;
         boolean deplacement = true;
@@ -125,6 +98,7 @@ public class CCommanderAnt extends CAnt implements Flow.Subscriber<CMessage> {
         }
     }
 
+    // methode pour revenir sur ses deplacements
     private void depilerDeplacement() {
         if(this.pileDeplacement.size() > 0) {
             Point point = this.pileDeplacement.pollLast();
@@ -132,7 +106,8 @@ public class CCommanderAnt extends CAnt implements Flow.Subscriber<CMessage> {
         }
     }
 
-    private void fight() {
+    // methode de gestion des combats
+    private void gestionCombat() {
         // SI fourmis autre couleur
         // ALORS:   SI fourmisAdverse = commandant
         //          ALORS:  SI isInjured = true ET fourmisAdverse.isInjured = false
@@ -148,4 +123,28 @@ public class CCommanderAnt extends CAnt implements Flow.Subscriber<CMessage> {
         //          FIN SI
         // FIN SI
     }
+
+    // +------+
+    // | FLOW |
+    // +------+
+    @Override
+    public void onSubscribe(Flow.Subscription subscription) {
+        this.subscription = subscription;
+        subscription.request(2);
+    }
+    @Override
+    public void onNext(CMessage pMessage) {
+        // distance < 50
+        int distanceX = this.getxPos() - pMessage.getAnthill().getPosition().x >= 0 ? this.getxPos() - pMessage.getAnthill().getPosition().x : (this.getxPos() - pMessage.getAnthill().getPosition().x)*-1;
+        int distanceY = this.getyPos() - pMessage.getAnthill().getPosition().y >= 0 ? this.getyPos() - pMessage.getAnthill().getPosition().y : (this.getyPos() - pMessage.getAnthill().getPosition().y)*-1;
+
+        if(distanceX <= 50 && distanceY <= 50) {
+            this.order = pMessage.getOrder();
+        }
+        subscription.request(2);
+    }
+    @Override
+    public void onError(Throwable throwable) {}
+    @Override
+    public void onComplete() {}
 }
